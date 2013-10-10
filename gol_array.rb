@@ -33,7 +33,8 @@ class World < Array
     end
     @cells.each do |row|
       row.each do |cell|
-        cell.step!
+        binding.pry
+        cell.rules!
       end
     end
   end
@@ -41,6 +42,7 @@ end
 
 class Cell
   attr_writer :neighbors
+  attr_writer :alive
 
   def initialize(seed_probabily)
     @alive = seed_probabily < rand
@@ -52,6 +54,10 @@ class Cell
 
   def to_s
     @alive ? 'O' : ' '    
+  end
+
+  def rules!
+    @alive = @alive ? @neighbors === (2..3) : 3 == @neighbors
   end
 end
 
@@ -96,9 +102,29 @@ describe 'the game of life' do
 
       it 'should apply rule 1 of the game' do
         world = World.new(5, 5, 1)
-        world.cells[1][1] = 1
+        world.cells[1][1].alive = true
         world.step!
         world.cells[1][1].to_i.should eq 0
+        world.cells[1][1].alive = true
+        world.cells[0][1].alive = true
+        world.step!
+        world.cells[1][1].to_i.should eq 0
+        world.cells[1][1].alive = true
+        world.cells[0][1].alive = true
+        world.cells[1][0].alive = true
+        world.step!
+        world.cells[1][1].to_i.should eq 0        
+      end
+
+      it 'should apply rule 2 of the game' do
+        world = World.new(5, 5, 1)
+        world.cells[1][1].alive = true
+        world.cells[0][1].alive = true
+        world.cells[1][0].alive = true
+        world.cells[1][2].alive = true
+        # binding.pry
+        world.step!
+        world.cells[1][1].to_i.should eq 1
       end
     end
   end
