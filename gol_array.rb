@@ -1,7 +1,6 @@
 require 'rspec'
 require "pry"
 
-
 class World < Array
 
   def initialize(x_dim, y_dim, seed_probabily)
@@ -33,10 +32,26 @@ class World < Array
     end
     @cells.each do |row|
       row.each do |cell|
-        binding.pry
+        # binding.pry
         cell.rules!
       end
     end
+  end
+
+  def display_world
+    newrow = Array.new(0)
+    newarray = Array.new(0)
+    @cells.each do |row|
+      row.each do |cell|
+        # binding.pry
+        newrow << cell.to_s
+        # binding.pry
+      end
+      newarray << newrow
+      # binding.pry
+      newrow = []
+    end
+    newarray
   end
 end
 
@@ -53,13 +68,14 @@ class Cell
   end
 
   def to_s
-    @alive ? 'O' : ' '    
+    @alive ? 'O' : '-'    
   end
 
   def rules!
-    @alive = @alive ? @neighbors === (2..3) : 3 == @neighbors
+    @alive = @alive ? (2..3) === @neighbors : 3 == @neighbors
   end
 end
+
 
 describe 'the game of life' do 
 
@@ -98,6 +114,15 @@ describe 'the game of life' do
       world.cells.should be_an_instance_of(Array)
     end
 
+    it '#display_world should print the current world state to the console' do
+      world = World.new(5, 5, 1)
+      array = Array.new(5) { Array.new(5) { '-' } }
+      world.display_world.should eq array
+      world.cells[1][1].alive = true
+      array[1][1] = 'O'
+      world.display_world.should eq array
+    end
+
     describe '#step! method' do
 
       it 'should apply rule 1 of the game' do
@@ -105,26 +130,47 @@ describe 'the game of life' do
         world.cells[1][1].alive = true
         world.step!
         world.cells[1][1].to_i.should eq 0
-        world.cells[1][1].alive = true
+        world.cells[1][1].alive = true       
         world.cells[0][1].alive = true
         world.step!
-        world.cells[1][1].to_i.should eq 0
-        world.cells[1][1].alive = true
-        world.cells[0][1].alive = true
-        world.cells[1][0].alive = true
-        world.step!
-        world.cells[1][1].to_i.should eq 0        
+        world.cells[1][1].to_i.should eq 0      
       end
 
       it 'should apply rule 2 of the game' do
+        world_1 = World.new(5, 5, 1)
+        world_2 = World.new(5, 5, 1)
+        world_1.cells[1][1].alive = true
+        world_1.cells[0][1].alive = true
+        world_1.cells[1][0].alive = true
+        world_1.step!
+        world_1.cells[1][1].to_i.should eq 1
+        world_2.cells[1][1].alive = true
+        world_2.cells[0][1].alive = true
+        world_2.cells[1][0].alive = true
+        world_2.cells[1][2].alive = true
+        # binding.pry
+        world_2.step!
+        world_2.cells[1][1].to_i.should eq 1
+      end
+
+      it 'should apply rule 3 of the game' do
         world = World.new(5, 5, 1)
         world.cells[1][1].alive = true
         world.cells[0][1].alive = true
         world.cells[1][0].alive = true
-        world.cells[1][2].alive = true
-        # binding.pry
         world.step!
-        world.cells[1][1].to_i.should eq 1
+        world.cells[0][0].to_i.should eq 1
+      end
+
+      it 'should apply rule 4 of the game' do
+        world = World.new(5, 5, 1)
+        world.cells[1][1].alive = true
+        world.cells[0][1].alive = true
+        world.cells[1][0].alive = true
+        world.cells[2][1].alive = true
+        world.cells[1][2].alive = true
+        world.step!
+        world.cells[1][1].to_i.should eq 0
       end
     end
   end
@@ -144,7 +190,7 @@ describe 'the game of life' do
       cell_2 = Cell.new(1)
 
       cell_1.to_s.should eq "O"
-      cell_2.to_s.should eq " "
+      cell_2.to_s.should eq "-"
     end
   end
 end
