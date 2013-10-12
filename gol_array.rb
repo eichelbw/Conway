@@ -3,8 +3,8 @@ require "pry"
 
 class World < Array
 
-  def initialize(x_dim, y_dim, seed_probabily)
-    @x_dim, @y_dim = x_dim, y_dim
+  def initialize(x_dim, y_dim, seed_probabily, steps)
+    @x_dim, @y_dim, @steps = x_dim, y_dim, steps
     @cells = Array.new(@y_dim) {
       Array.new(@x_dim) { 
         Cell.new(seed_probabily) 
@@ -43,15 +43,26 @@ class World < Array
     newarray = Array.new(0)
     @cells.each do |row|
       row.each do |cell|
-        # binding.pry
         newrow << cell.to_s
-        # binding.pry
       end
       newarray << newrow
-      # binding.pry
       newrow = []
     end
     newarray
+  end
+
+  def play!
+    (1...@steps).each do
+      self.display_world.each do |row|
+        row.each do |cell|
+          print cell
+        end
+        puts
+      end
+      sleep(0.5)
+      system('clear')
+      step!
+    end
   end
 end
 
@@ -76,13 +87,15 @@ class Cell
   end
 end
 
+world = World.new(10,10,0.5,100)
+world.play!
 
 describe 'the game of life' do 
 
   describe 'class initialization' do
 
-    it 'world initialization should take dimensions, seed probability and return an array' do
-      world = World.new(10, 10, 0.5)
+    it 'world initialization should take dimensions, seed probability, steps and return an array' do
+      world = World.new(10, 10, 0.5, 1)
 
       world.should be_an_instance_of(World)
     end
@@ -97,7 +110,7 @@ describe 'the game of life' do
   describe 'world methods' do
 
     it '#alive_neighbors(coordinates) should return number of live neighbors to cell at coordinates' do
-      world = World.new(5, 5, 1)
+      world = World.new(5, 5, 1, 1)
       world.cells[1][1] = 1
       world.alive_neighbors(1, 1).should eq 0
       world.cells[1][0] = 1
@@ -107,7 +120,7 @@ describe 'the game of life' do
     end
 
     it '#cells should return an array of the cells in the world' do
-      world = World.new(5, 5, 1)
+      world = World.new(5, 5, 1, 1)
 
       world.cells.should be_an_instance_of(Array)
       world.cells[1][1] = 1
@@ -115,7 +128,7 @@ describe 'the game of life' do
     end
 
     it '#display_world should print the current world state to the console' do
-      world = World.new(5, 5, 1)
+      world = World.new(5, 5, 1, 1)
       array = Array.new(5) { Array.new(5) { '-' } }
       world.display_world.should eq array
       world.cells[1][1].alive = true
@@ -126,7 +139,7 @@ describe 'the game of life' do
     describe '#step! method' do
 
       it 'should apply rule 1 of the game' do
-        world = World.new(5, 5, 1)
+        world = World.new(5, 5, 1, 1)
         world.cells[1][1].alive = true
         world.step!
         world.cells[1][1].to_i.should eq 0
@@ -137,8 +150,8 @@ describe 'the game of life' do
       end
 
       it 'should apply rule 2 of the game' do
-        world_1 = World.new(5, 5, 1)
-        world_2 = World.new(5, 5, 1)
+        world_1 = World.new(5, 5, 1, 1)
+        world_2 = World.new(5, 5, 1, 1)
         world_1.cells[1][1].alive = true
         world_1.cells[0][1].alive = true
         world_1.cells[1][0].alive = true
@@ -154,7 +167,7 @@ describe 'the game of life' do
       end
 
       it 'should apply rule 3 of the game' do
-        world = World.new(5, 5, 1)
+        world = World.new(5, 5, 1, 1)
         world.cells[1][1].alive = true
         world.cells[0][1].alive = true
         world.cells[1][0].alive = true
@@ -163,7 +176,7 @@ describe 'the game of life' do
       end
 
       it 'should apply rule 4 of the game' do
-        world = World.new(5, 5, 1)
+        world = World.new(5, 5, 1, 1)
         world.cells[1][1].alive = true
         world.cells[0][1].alive = true
         world.cells[1][0].alive = true
